@@ -74,6 +74,23 @@ button{font:inherit;color:inherit;cursor:pointer;border-radius:0}
 .sw[aria-pressed=true]::after{content:"";position:absolute;inset:-5px;border:1.5px solid var(--wine);border-radius:50%}
 .sw::before{content:"";position:absolute;inset:-9px}
 
+.grp{display:flex;gap:8px}
+.opt{padding:0 10px;font-size:.8125rem}
+.drawer{display:none;width:min(100%,760px);background:var(--paper);border:1px solid var(--ink);padding:8px 12px;gap:2px 24px;max-height:42vh;overflow:auto}
+body.more-open .drawer{display:grid}
+.drawer .col{display:grid;gap:8px;align-content:start}
+.line{display:flex;align-items:center;gap:8px;min-height:38px;flex-wrap:wrap}
+.lab{width:4.2rem;flex:none;font-size:.8125rem;color:var(--ink-2)}
+.line small{font-size:.8125rem;color:var(--ink-2);white-space:nowrap}
+.line .seg{flex-wrap:wrap}
+.line .opt{min-height:38px}
+.line .seg .opt+.opt{margin-left:-1px}
+.note{grid-column:1/-1;margin:0;font-size:.75rem;color:var(--ink-2)}
+@media (min-width:760px){.drawer{grid-template-columns:1fr 1fr}.panel{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}.panel .row{display:contents}.panel .drawer{flex:0 1 760px}}
+@media (max-width:759px){.drawer .seg .opt{padding:0 8px}.drawer{max-height:40vh}.line small{display:none}body.more-open .panel>.row:first-child{display:none}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.seg .opt+.opt{margin-left:-1px}
+
 /* Справка */
 .helpbox{position:fixed;inset:0;display:none;place-items:center;background:rgba(29,26,27,.45);padding:16px;z-index:5}
 .help .helpbox{display:grid}
@@ -130,9 +147,23 @@ button{font:inherit;color:inherit;cursor:pointer;border-radius:0}
   </div>
   <div class="row">
     <button class="btn" id="btn-light" type="button" aria-pressed="true">Подсветка</button>
-    <div class="colors"><small id="swatch-name"></small><div id="swatches" role="group" aria-label="Цвет фасадов"></div></div>
+    <button class="btn" id="btn-more" type="button" aria-expanded="false" aria-controls="more">Фасады и ручки</button>
+  </div>
+  <div class="drawer" id="more">
+    <div class="col">
+      <div class="line"><span class="lab">Секция</span><div id="target-sw" class="seg" role="group" aria-label="Секция шкафа"></div></div>
+      <div class="line"><span class="lab">Фасад</span><div id="style-sw" class="seg" role="group" aria-label="Тип фасада"></div></div>
+      <div class="line"><span class="lab">Цвет</span><div id="swatches" class="grp" role="group" aria-label="Цвет фасада"></div><small id="swatch-name"></small></div>
+    </div>
+    <div class="col">
+      <div class="line"><span class="lab">Ручки</span><div id="hstyle-sw" class="seg" role="group" aria-label="Форма ручек"></div></div>
+      <div class="line"><span class="lab">Отделка</span><div id="handle-sw" class="grp" role="group" aria-label="Отделка ручек"></div><small id="handle-name"></small></div>
+      <div class="line"><span class="lab">Свет</span><div id="led-sw" class="seg" role="group" aria-label="Цветовая температура света"></div></div>
+    </div>
+    <p class="note">Примеры цветов и ручек, не каталог. Цвета на экране могут немного отличаться.</p>
   </div>
 </div>
+<p id="live" class="sr" aria-live="polite"></p>
 
 <div class="helpbox"><div role="dialog" aria-label="Как пользоваться">
   <h2>Как смотреть шкаф</h2>
@@ -141,7 +172,7 @@ button{font:inherit;color:inherit;cursor:pointer;border-radius:0}
     <li><b>Приблизить:</b> колесо мыши или два пальца.</li>
     <li><b>Открыть дверцу:</b> нажмите на «+» или прямо на дверцу.</li>
     <li><b>Заглянуть внутрь:</b> кнопка «Внутри» откроет всё и подведёт камеру.</li>
-    <li><b>Цвет:</b> кружки внизу меняют цвет фасадов (примеры, не каталог).</li>
+    <li><b>Фасады и ручки:</b> выберите секцию (все, дверца или антресоль), затем тип фасада, цвет и форму ручек. Каждая секция может быть своей.</li>
     <li><b>Вернуться:</b> двойное нажатие на пустое место.</li>
   </ul>
   <button class="btn main" id="help-close" type="button">Понятно</button>
