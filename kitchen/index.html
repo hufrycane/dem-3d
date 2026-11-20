@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DEM — конфигуратор кухни</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Spectral:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#E8E8E4;--paper-2:#F2F1ED;--ink:#1D1A1B;--ink-2:#4C4648;--wine:#5E1A28;--on-wine:#F4EFE9;--line:rgba(29,26,27,.18);
+  --serif:"Spectral",Georgia,serif;--sans:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;--ease:cubic-bezier(.16,1,.3,1);--pw:340px}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font:400 14px/1.45 var(--sans);overflow:hidden;-webkit-text-size-adjust:100%}
+::selection{background:var(--wine);color:var(--on-wine)}
+button{font:inherit;color:inherit;cursor:pointer;border-radius:0}
+button:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
+
+#stage{position:fixed;inset:0 var(--pw) 0 0;touch-action:none;opacity:0;transition:opacity .8s var(--ease)}
+.ready #stage{opacity:1}
+#stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.loading{position:fixed;inset:0 var(--pw) 0 0;display:grid;place-items:center;font:400 1.25rem var(--serif);color:var(--ink-2);pointer-events:none;transition:opacity .4s}
+.ready .loading{opacity:0}
+
+.title{position:fixed;left:0;top:0;right:var(--pw);padding:20px 24px 36px;pointer-events:none;background:linear-gradient(rgba(232,232,228,.88),rgba(232,232,228,0))}
+.title h1{margin:0;font:400 1.75rem/1.1 var(--serif)}
+.title p{margin:4px 0 0;font-size:.8125rem;color:var(--ink-2)}
+
+.views{position:fixed;left:16px;bottom:16px;right:calc(var(--pw) + 16px);display:flex;flex-wrap:wrap;gap:8px;align-items:center;pointer-events:none}
+.views>*{pointer-events:auto}
+.seg{display:flex}
+.btn{min-height:42px;padding:0 14px;border:1px solid var(--ink);background:var(--paper);white-space:nowrap;font-weight:500}
+.seg .btn+.btn{margin-left:-1px}
+.btn:hover{background:#dcdcd6}
+.btn[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.btn.main{background:var(--wine);border-color:var(--wine);color:var(--on-wine);font-weight:600}
+.btn.main:hover,.btn.main[aria-pressed=true]{background:#7A2536}
+
+.hint{position:fixed;left:calc((100% - var(--pw))/2);bottom:76px;transform:translateX(-50%);pointer-events:none;background:rgba(242,241,237,.92);padding:8px 14px;font:400 1.0625rem/1.3 var(--serif);text-align:center;transition:opacity .5s}
+.touched .hint{opacity:0}
+
+#panel{position:fixed;top:0;right:0;bottom:0;width:var(--pw);background:var(--paper-2);border-left:1px solid var(--line);display:flex;flex-direction:column}
+#panel header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:16px 18px;border-bottom:1px solid var(--line)}
+#panel header h2{margin:0;font:400 1.375rem/1 var(--serif)}
+#panel header .act{display:flex;gap:6px}
+#panel header .btn{min-height:34px;padding:0 10px;font-size:.8125rem}
+#panel .body{overflow-y:auto;padding:4px 18px 24px;scrollbar-width:thin;scrollbar-color:var(--ink-2) transparent}
+.sec{padding:16px 0 18px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec h3{margin:0 0 10px;font:400 1.1875rem/1.2 var(--serif)}
+.lab{margin:12px 0 8px;font-size:.8125rem;color:var(--ink-2)}
+.lab b{font-weight:600;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:34px;padding:0 11px;border:1px solid var(--line);background:#fff;font-size:.8125rem}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sws{display:flex;flex-wrap:wrap;gap:9px}
+.sw{position:relative;width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.25);padding:0}
+.sw::before{content:"";position:absolute;inset:-7px}
+.sw[aria-pressed=true]::after{content:"";position:absolute;inset:-5px;border:1.5px solid var(--wine);border-radius:50%}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tile{display:flex;align-items:center;gap:8px;padding:6px;border:1px solid var(--line);background:#fff;text-align:left;font-size:.8125rem;min-height:44px}
+.tile i{flex:none;width:30px;height:30px;border:1px solid rgba(0,0,0,.15)}
+.tile:hover{border-color:var(--ink)}
+.tile[aria-pressed=true]{border-color:var(--wine);box-shadow:inset 0 0 0 1px var(--wine)}
+.toggle{display:flex;align-items:center;gap:10px;min-height:40px;cursor:pointer}
+.toggle input{width:20px;height:20px;accent-color:var(--wine)}
+#btn-panel{display:none}
+
+.nogl{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:24px;background:var(--paper)}
+.no-gl .nogl{display:grid}
+.bare .title,.bare .views,.bare .hint{display:none}
+
+@media (max-width:820px){
+  :root{--pw:0px}
+  #stage,.loading{inset:0}
+  .title{right:0;padding:12px 16px 26px}.title h1{font-size:1.3rem}.title p{font-size:.75rem}
+  .views{right:16px;bottom:calc(16px + env(safe-area-inset-bottom))}
+  .views .seg .btn{padding:0 9px;font-size:.8125rem;min-height:38px}
+  .hint{left:50%;bottom:120px;font-size:.95rem}
+  #panel{top:auto;width:100%;height:min(48vh,440px);border-left:0;border-top:1px solid var(--line);transform:translateY(100%);transition:transform .45s var(--ease);z-index:5;box-shadow:0 -8px 24px rgba(0,0,0,.12)}
+  .panel-open #panel{transform:none}
+  #btn-panel{display:inline-flex;align-items:center}
+  .panel-open #stage{bottom:min(48vh,440px)}
+  .panel-open .views,.panel-open .hint{display:none}
+  .chip{min-height:40px}
+  .tile{min-height:48px}
+  .hint{bottom:auto;top:96px}
+  #panel header .close{display:inline-flex}
+}
+@media (min-width:821px){#panel header .close{display:none}}
+@media (prefers-reduced-motion:reduce){#stage,#panel{transition:none}}
+</style>
+</head>
+<body>
+<div id="stage" role="img" aria-label="Интерактивная 3D-модель угловой кухни"></div>
+<div class="loading">Загружаем кухню…</div>
+
+<div class="title"><h1>Угловая кухня</h1><p>Модель для примера по нашей работе. Соберите свою: фасады, столешница, фартук, ручки.</p></div>
+
+<div class="views">
+  <button class="btn main" id="btn-all" type="button" aria-pressed="false">Открыть всё</button>
+  <div class="seg" role="group" aria-label="Ракурс">
+    <button class="btn" type="button" data-view="overview" aria-pressed="true">Общий вид</button>
+    <button class="btn" type="button" data-view="sink">Мойка</button>
+    <button class="btn" type="button" data-view="corner">Угол</button>
+    <button class="btn" type="button" data-view="cols">Колонны</button>
+  </div>
+  <button class="btn" id="btn-panel" type="button">Настроить</button>
+</div>
+
+<div class="hint" aria-hidden="true">Потяните, чтобы осмотреться.<br>Нажмите на дверцу или ящик, чтобы открыть.</div>
+
+<aside id="panel" aria-label="Настройки кухни">
+  <header>
+    <h2>Ваша кухня</h2>
+    <div class="act">
+      <button class="btn" id="btn-undo" type="button">Отменить</button>
+      <button class="btn" id="btn-reset" type="button">Сбросить</button>
+      <button class="btn close" type="button" onclick="document.body.classList.remove('panel-open')" aria-label="Свернуть настройки">✕</button>
+    </div>
+  </header>
+  <div class="body"></div>
+</aside>
+
+<div class="nogl"><p>Не удалось запустить 3D в этом браузере. Откройте страницу в Chrome или Safari.</p></div>
+<script src="viewer.js"></script>
+</body>
+</html>
