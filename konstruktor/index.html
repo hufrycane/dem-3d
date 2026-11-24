@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Конструктор шкафа DEM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Spectral:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>DEM</b> <span>Конструктор шкафа-купе</span></div>
+  <ol class="steps" aria-label="Шаги">
+    <li><button type="button" data-step="1"><span>1</span>Размеры</button></li>
+    <li><button type="button" data-step="2"><span>2</span>Наполнение</button></li>
+    <li><button type="button" data-step="3"><span>3</span>Двери</button></li>
+    <li><button type="button" data-step="4"><span>4</span>Итог</button></li>
+  </ol>
+</header>
+
+<p class="disclaimer">Предварительный расчёт. Цены и ограничения демонстрационные; итог подтверждает производство.</p>
+<p id="storageStatus" class="disclaimer" role="status"></p>
+<main class="layout" data-current-step="1">
+  <section class="stage" aria-label="Схема шкафа">
+    <div class="palette" id="palette" role="toolbar" aria-label="Элементы наполнения"></div>
+    <div class="canvas-wrap">
+      <svg id="cab" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Схема шкафа, вид спереди без дверей"></svg>
+      <p class="legend"><i class="lg-joint"></i>Зоны стыков — упрощённый запрет для выкатных элементов, не точная кинематика купе. Внизу ширина створок.</p>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <section id="numeric" class="card" data-only="2">
+      <h2>Точное размещение без мыши</h2>
+      <p>Выберите элемент сверху. X задаёт секцию (от левого края корпуса), Y — точку размещения от пола, мм. Полка и стойка привязываются к секции; ящики — к опоре, пантограф — к верху. Точные размеры показаны на схеме.</p>
+      <div class="fields"><label>X, мм<input id="placeX" type="number" value="400" step="1"></label><label>Y, мм<input id="placeY" type="number" value="1200" step="1"></label></div>
+      <button type="button" class="ghost" id="placeNumeric">Поставить выбранный элемент</button>
+    </section>
+    <section class="card" id="doorSketch" data-only="3 4"><h2>Фасад</h2><svg id="facade" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Фасад с размерами дверей"></svg></section>
+    <section class="card" id="summary" data-only="4"><h2>Ваш проект</h2><div id="summaryText"></div><p>Это эскиз, не производственная документация. Монтаж и доставка не включены. Реальная заявка и отправка почты в этой версии отсутствуют.</p><div class="actions"><button class="ghost" type="button" data-go="2">Изменить наполнение</button><button class="ghost" type="button" data-go="3">Изменить двери</button></div><button type="button" class="cta" id="print">Сохранить расчёт / PDF</button><p><button type="button" class="cta" disabled aria-describedby="requestNote">Отправить проект — скоро</button></p><p id="requestNote" class="note">Отправка пока недоступна. Контакты и персональные данные не собираются; проект хранится только в вашем браузере или скачанном JSON.</p></section>
+  </section>
+
+  <aside class="side">
+    <section class="card price" aria-label="Стоимость">
+      <div class="row"><span>Шкаф</span><b id="pBody">0</b></div>
+      <div class="row"><span>Двери</span><b id="pDoors">0</b></div>
+      <div class="row total"><span>Итого</span><b id="pTotal">0</b></div>
+      <details id="breakdown"><summary>Из чего складывается цена</summary><ul id="lines"></ul></details>
+    </section>
+
+    <section class="card info" id="info" data-only="2" aria-label="Элемент"></section>
+
+    <section class="card size" data-only="1" aria-label="Размеры и корпус">
+      <h2>Размеры и корпус</h2>
+      <div class="fields">
+        <label>Ширина<input id="inW" type="number" inputmode="numeric" step="10"></label>
+        <label>Высота<input id="inH" type="number" inputmode="numeric" step="10"></label>
+        <label>Глубина<input id="inD" type="number" inputmode="numeric" step="10"></label>
+      </div>
+      <div class="seg" role="radiogroup" aria-label="Тип шкафа">
+        <button type="button" data-kind="built" role="radio">Встроенный</button>
+        <button type="button" data-kind="case" role="radio">Корпусный</button>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="wLeft"> Стенка слева</label>
+        <label><input type="checkbox" id="wRight"> Стенка справа</label>
+        <label><input type="checkbox" id="wTop"> Потолок</label>
+        <label><input type="checkbox" id="wBottom"> Пол</label>
+        <label><input type="checkbox" id="plinth"> Цоколь</label>
+      </div>
+    </section>
+    <section class="card" data-only="3"><h2>Двери — демонстрационный каталог</h2>
+      <p class="note">Нажмите на вставку фасада или выберите дверь и вставку кнопками. До 4 вставок на дверь, деление пополам. Материалы и цены — демо.</p>
+      <h3>Дверь</h3><div id="doorChoices" class="choices" role="group" aria-label="Выбор двери"></div>
+      <h3>Вставка</h3><div id="insertChoices" class="choices" role="group" aria-label="Выбор вставки"></div>
+      <p id="doorSelection" class="note" role="status" aria-live="polite"></p>
+      <label>Материал выбранной вставки<select id="doorMaterial"></select></label>
+      <div class="actions"><button type="button" class="ghost" id="splitHorizontal">Разделить по горизонтали</button><button type="button" class="ghost" id="splitVertical">Разделить по вертикали</button></div>
+      <div class="actions"><button type="button" class="ghost" id="resetDoor">Сбросить выбранную дверь</button><button type="button" class="ghost" id="applyDoors">Применить ко всем дверям</button></div>
+      <label>Цвет профиля всех дверей<select id="doorProfile"></select></label>
+      <div class="doors">
+        <span>Число дверей</span>
+        <div class="stepper">
+          <button type="button" id="dMinus" aria-label="Меньше дверей">−</button>
+          <output id="dCount">3</output>
+          <button type="button" id="dPlus" aria-label="Больше дверей">+</button>
+        </div>
+      </div>
+    </section>
+    <section class="card" data-only="1 2"><p>Начните со стоек для широкого шкафа, затем добавьте полки и оснащение. Или загрузите пример.</p><div class="actions"><button type="button" class="ghost" id="sample">Пример наполнения</button><button type="button" class="ghost" id="clear">Удалить всё</button></div></section>
+    <button type="button" class="ghost" id="undo">Отменить последнее изменение</button>
+    <div class="actions"><button type="button" class="ghost" id="back">Назад</button><button type="button" class="cta" id="next">К наполнению</button></div>
+    <section class="card"><h2>Проект JSON</h2><button type="button" class="ghost" id="export">Скачать проект</button><label>Открыть проект<input id="import" type="file" accept="application/json,.json"></label><p class="note">Автосохранение в этом браузере. Контакты не запрашиваются.</p></section>
+  </aside>
+</main>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
